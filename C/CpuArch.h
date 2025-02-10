@@ -1,6 +1,7 @@
 /* CpuArch.h -- CPU specific code
 2021-07-13 : Igor Pavlov : Public domain */
 
+//#pragma once
 #ifndef __CPU_ARCH_H
 #define __CPU_ARCH_H
 
@@ -265,50 +266,50 @@ MY_CPU_64BIT means that processor can work with 64-bit registers.
 
 #ifdef MY_CPU_LE_UNALIGN
 
-#define GetUi16(p) (*(const UInt16 *)(const void *)(p))
-#define GetUi32(p) (*(const UInt32 *)(const void *)(p))
-#ifdef MY_CPU_LE_UNALIGN_64
-#define GetUi64(p) (*(const UInt64 *)(const void *)(p))
-#endif
+  #define GetUi16(p) (*(const UInt16 *)(const void *)(p))
+  #define GetUi32(p) (*(const UInt32 *)(const void *)(p))
+  #ifdef MY_CPU_LE_UNALIGN_64
+    #define GetUi64(p) (*(const UInt64 *)(const void *)(p))
+  #endif
 
-#define SetUi16(p, v) { *(UInt16 *)(void *)(p) = (v); }
-#define SetUi32(p, v) { *(UInt32 *)(void *)(p) = (v); }
-#ifdef MY_CPU_LE_UNALIGN_64
-#define SetUi64(p, v) { *(UInt64 *)(void *)(p) = (v); }
-#endif
+  #define SetUi16(p, v) { *(UInt16 *)(void *)(p) = (v); }
+  #define SetUi32(p, v) { *(UInt32 *)(void *)(p) = (v); }
+  #ifdef MY_CPU_LE_UNALIGN_64
+    #define SetUi64(p, v) { *(UInt64 *)(void *)(p) = (v); }
+  #endif
 
 #else
 
-#define GetUi16(p) ( (UInt16) ( \
-             ((const Byte *)(p))[0] | \
-    ((UInt16)((const Byte *)(p))[1] << 8) ))
+  #define GetUi16(p) ( (UInt16) ( \
+  ((const Byte *)(p))[0] | \
+  ((UInt16)((const Byte *)(p))[1] << 8) ))
 
-#define GetUi32(p) ( \
-             ((const Byte *)(p))[0]        | \
-    ((UInt32)((const Byte *)(p))[1] <<  8) | \
-    ((UInt32)((const Byte *)(p))[2] << 16) | \
-    ((UInt32)((const Byte *)(p))[3] << 24))
+  #define GetUi32(p) ( \
+  ((const Byte *)(p))[0]        | \
+  ((UInt32)((const Byte *)(p))[1] <<  8) | \
+  ((UInt32)((const Byte *)(p))[2] << 16) | \
+  ((UInt32)((const Byte *)(p))[3] << 24))
 
-#define SetUi16(p, v) { Byte *_ppp_ = (Byte *)(p); UInt32 _vvv_ = (v); \
-    _ppp_[0] = (Byte)_vvv_; \
-    _ppp_[1] = (Byte)(_vvv_ >> 8); }
+  #define SetUi16(p, v) { Byte *_ppp_ = (Byte *)(p); UInt32 _vvv_ = (v); \
+  _ppp_[0] = (Byte)_vvv_; \
+  _ppp_[1] = (Byte)(_vvv_ >> 8); }
 
-#define SetUi32(p, v) { Byte *_ppp_ = (Byte *)(p); UInt32 _vvv_ = (v); \
-    _ppp_[0] = (Byte)_vvv_; \
-    _ppp_[1] = (Byte)(_vvv_ >> 8); \
-    _ppp_[2] = (Byte)(_vvv_ >> 16); \
-    _ppp_[3] = (Byte)(_vvv_ >> 24); }
+  #define SetUi32(p, v) { Byte *_ppp_ = (Byte *)(p); UInt32 _vvv_ = (v); \
+  _ppp_[0] = (Byte)_vvv_; \
+  _ppp_[1] = (Byte)(_vvv_ >> 8); \
+  _ppp_[2] = (Byte)(_vvv_ >> 16); \
+  _ppp_[3] = (Byte)(_vvv_ >> 24); }
 
 #endif
 
 
 #ifndef MY_CPU_LE_UNALIGN_64
 
-#define GetUi64(p) (GetUi32(p) | ((UInt64)GetUi32(((const Byte *)(p)) + 4) << 32))
+  #define GetUi64(p) (GetUi32(p) | ((UInt64)GetUi32(((const Byte *)(p)) + 4) << 32))
 
-#define SetUi64(p, v) { Byte *_ppp2_ = (Byte *)(p); UInt64 _vvv2_ = (v); \
-    SetUi32(_ppp2_    , (UInt32)_vvv2_); \
-    SetUi32(_ppp2_ + 4, (UInt32)(_vvv2_ >> 32)); }
+  #define SetUi64(p, v) { Byte *_ppp2_ = (Byte *)(p); UInt64 _vvv2_ = (v); \
+  SetUi32(_ppp2_    , (UInt32)_vvv2_); \
+  SetUi32(_ppp2_ + 4, (UInt32)(_vvv2_ >> 32)); }
 
 #endif
 
@@ -323,54 +324,54 @@ MY_CPU_64BIT means that processor can work with 64-bit registers.
 
 #if defined(MY_CPU_LE_UNALIGN) && /* defined(_WIN64) && */ defined(_MSC_VER) && (_MSC_VER >= 1300)
 
-/* Note: we use bswap instruction, that is unsupported in 386 cpu */
+  /* Note: we use bswap instruction, that is unsupported in 386 cpu */
 
-#include <stdlib.h>
+  #include <stdlib.h>
 
-#pragma intrinsic(_byteswap_ushort)
-#pragma intrinsic(_byteswap_ulong)
-#pragma intrinsic(_byteswap_uint64)
+  #pragma intrinsic(_byteswap_ushort)
+  #pragma intrinsic(_byteswap_ulong)
+  #pragma intrinsic(_byteswap_uint64)
 
-/* #define GetBe16(p) _byteswap_ushort(*(const UInt16 *)(const Byte *)(p)) */
-#define GetBe32(p) _byteswap_ulong (*(const UInt32 *)(const void *)(p))
-#define GetBe64(p) _byteswap_uint64(*(const UInt64 *)(const void *)(p))
+  /* #define GetBe16(p) _byteswap_ushort(*(const UInt16 *)(const Byte *)(p)) */
+  #define GetBe32(p) _byteswap_ulong (*(const UInt32 *)(const void *)(p))
+  #define GetBe64(p) _byteswap_uint64(*(const UInt64 *)(const void *)(p))
 
-#define SetBe32(p, v) (*(UInt32 *)(void *)(p)) = _byteswap_ulong(v)
+  #define SetBe32(p, v) (*(UInt32 *)(void *)(p)) = _byteswap_ulong(v)
 
 #elif defined(MY_CPU_LE_UNALIGN) && ( \
-       (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))) \
-    || (defined(__clang__) && MY__has_builtin(__builtin_bswap16)) )
+(defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))) \
+|| (defined(__clang__) && MY__has_builtin(__builtin_bswap16)) )
 
-/* #define GetBe16(p) __builtin_bswap16(*(const UInt16 *)(const void *)(p)) */
-#define GetBe32(p) __builtin_bswap32(*(const UInt32 *)(const void *)(p))
-#define GetBe64(p) __builtin_bswap64(*(const UInt64 *)(const void *)(p))
+  /* #define GetBe16(p) __builtin_bswap16(*(const UInt16 *)(const void *)(p)) */
+  #define GetBe32(p) __builtin_bswap32(*(const UInt32 *)(const void *)(p))
+  #define GetBe64(p) __builtin_bswap64(*(const UInt64 *)(const void *)(p))
 
-#define SetBe32(p, v) (*(UInt32 *)(void *)(p)) = __builtin_bswap32(v)
+  #define SetBe32(p, v) (*(UInt32 *)(void *)(p)) = __builtin_bswap32(v)
 
 #else
 
-#define GetBe32(p) ( \
-    ((UInt32)((const Byte *)(p))[0] << 24) | \
-    ((UInt32)((const Byte *)(p))[1] << 16) | \
-    ((UInt32)((const Byte *)(p))[2] <<  8) | \
-             ((const Byte *)(p))[3] )
+  #define GetBe32(p) ( \
+  ((UInt32)((const Byte *)(p))[0] << 24) | \
+  ((UInt32)((const Byte *)(p))[1] << 16) | \
+  ((UInt32)((const Byte *)(p))[2] <<  8) | \
+  ((const Byte *)(p))[3] )
 
-#define GetBe64(p) (((UInt64)GetBe32(p) << 32) | GetBe32(((const Byte *)(p)) + 4))
+  #define GetBe64(p) (((UInt64)GetBe32(p) << 32) | GetBe32(((const Byte *)(p)) + 4))
 
-#define SetBe32(p, v) { Byte *_ppp_ = (Byte *)(p); UInt32 _vvv_ = (v); \
-    _ppp_[0] = (Byte)(_vvv_ >> 24); \
-    _ppp_[1] = (Byte)(_vvv_ >> 16); \
-    _ppp_[2] = (Byte)(_vvv_ >> 8); \
-    _ppp_[3] = (Byte)_vvv_; }
+  #define SetBe32(p, v) { Byte *_ppp_ = (Byte *)(p); UInt32 _vvv_ = (v); \
+  _ppp_[0] = (Byte)(_vvv_ >> 24); \
+  _ppp_[1] = (Byte)(_vvv_ >> 16); \
+  _ppp_[2] = (Byte)(_vvv_ >> 8); \
+   _ppp_[3] = (Byte)_vvv_; }
 
 #endif
 
 
 #ifndef GetBe16
 
-#define GetBe16(p) ( (UInt16) ( \
-    ((UInt16)((const Byte *)(p))[0] << 8) | \
-             ((const Byte *)(p))[1] ))
+  #define GetBe16(p) ( (UInt16) ( \
+  ((UInt16)((const Byte *)(p))[0] << 8) | \
+  ((const Byte *)(p))[1] ))
 
 #endif
 
@@ -378,65 +379,65 @@ MY_CPU_64BIT means that processor can work with 64-bit registers.
 
 #ifdef MY_CPU_X86_OR_AMD64
 
-typedef struct
-{
-  UInt32 maxFunc;
-  UInt32 vendor[3];
-  UInt32 ver;
-  UInt32 b;
-  UInt32 c;
-  UInt32 d;
-} Cx86cpuid;
+  typedef struct
+  {
+    UInt32 maxFunc;
+    UInt32 vendor[3];
+    UInt32 ver;
+    UInt32 b;
+    UInt32 c;
+    UInt32 d;
+  } Cx86cpuid;
 
-enum
-{
-  CPU_FIRM_INTEL,
-  CPU_FIRM_AMD,
-  CPU_FIRM_VIA
-};
+  enum
+  {
+    CPU_FIRM_INTEL,
+    CPU_FIRM_AMD,
+    CPU_FIRM_VIA
+  };
 
-void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d);
+  void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d);
 
-BoolInt x86cpuid_CheckAndRead(Cx86cpuid *p);
-int x86cpuid_GetFirm(const Cx86cpuid *p);
+  BoolInt x86cpuid_CheckAndRead(Cx86cpuid *p);
+  int x86cpuid_GetFirm(const Cx86cpuid *p);
 
-#define x86cpuid_GetFamily(ver) (((ver >> 16) & 0xFF0) | ((ver >> 8) & 0xF))
-#define x86cpuid_GetModel(ver)  (((ver >> 12) &  0xF0) | ((ver >> 4) & 0xF))
-#define x86cpuid_GetStepping(ver) (ver & 0xF)
+  #define x86cpuid_GetFamily(ver) (((ver >> 16) & 0xFF0) | ((ver >> 8) & 0xF))
+  #define x86cpuid_GetModel(ver)  (((ver >> 12) &  0xF0) | ((ver >> 4) & 0xF))
+  #define x86cpuid_GetStepping(ver) (ver & 0xF)
 
-BoolInt CPU_Is_InOrder(void);
+  BoolInt CPU_Is_InOrder(void);
 
-BoolInt CPU_IsSupported_AES(void);
-BoolInt CPU_IsSupported_AVX2(void);
-BoolInt CPU_IsSupported_VAES_AVX2(void);
-BoolInt CPU_IsSupported_SSSE3(void);
-BoolInt CPU_IsSupported_SSE41(void);
-BoolInt CPU_IsSupported_SHA(void);
-BoolInt CPU_IsSupported_PageGB(void);
+  BoolInt CPU_IsSupported_AES(void);
+  BoolInt CPU_IsSupported_AVX2(void);
+  BoolInt CPU_IsSupported_VAES_AVX2(void);
+  BoolInt CPU_IsSupported_SSSE3(void);
+  BoolInt CPU_IsSupported_SSE41(void);
+  BoolInt CPU_IsSupported_SHA(void);
+  BoolInt CPU_IsSupported_PageGB(void);
 
 #elif defined(MY_CPU_ARM_OR_ARM64)
 
-BoolInt CPU_IsSupported_CRC32(void);
-BoolInt CPU_IsSupported_NEON(void);
+  BoolInt CPU_IsSupported_CRC32(void);
+  BoolInt CPU_IsSupported_NEON(void);
 
-#if defined(_WIN32)
-BoolInt CPU_IsSupported_CRYPTO(void);
-#define CPU_IsSupported_SHA1  CPU_IsSupported_CRYPTO
-#define CPU_IsSupported_SHA2  CPU_IsSupported_CRYPTO
-#define CPU_IsSupported_AES   CPU_IsSupported_CRYPTO
-#else
-BoolInt CPU_IsSupported_SHA1(void);
-BoolInt CPU_IsSupported_SHA2(void);
-BoolInt CPU_IsSupported_AES(void);
-#endif
+  #if defined(_WIN32)
+    BoolInt CPU_IsSupported_CRYPTO(void);
+    #define CPU_IsSupported_SHA1  CPU_IsSupported_CRYPTO
+    #define CPU_IsSupported_SHA2  CPU_IsSupported_CRYPTO
+    #define CPU_IsSupported_AES   CPU_IsSupported_CRYPTO
+  #else
+    BoolInt CPU_IsSupported_SHA1(void);
+    BoolInt CPU_IsSupported_SHA2(void);
+    BoolInt CPU_IsSupported_AES(void);
+  #endif
 
 #endif
 
 #if defined(__APPLE__)
-int My_sysctlbyname_Get(const char *name, void *buf, size_t *bufSize);
-int My_sysctlbyname_Get_UInt32(const char *name, UInt32 *val);
+  int My_sysctlbyname_Get(const char *name, void *buf, size_t *bufSize);
+  int My_sysctlbyname_Get_UInt32(const char *name, UInt32 *val);
 #endif
 
 EXTERN_C_END
 
-#endif
+#endif //#pragma once

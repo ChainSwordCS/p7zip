@@ -69,9 +69,11 @@ UInt32 MY_FAST_CALL CrcUpdateT1(UInt32 v, const void *data, size_t size, const U
 
 /* ---------- hardware CRC ---------- */
 
+//#define USE_CRC_EMU
+
 #ifdef MY_CPU_LE
 
-  #if defined(MY_CPU_ARM_OR_ARM64)
+  #if defined(MY_CPU_ARM_OR_ARM64) && !defined(USE_CRC_EMU)
 
     // #pragma message("ARM*")
 
@@ -95,11 +97,9 @@ UInt32 MY_FAST_CALL CrcUpdateT1(UInt32 v, const void *data, size_t size, const U
       #endif
     #endif
 
-    #else
+  #else
 
     // no hardware CRC
-
-    // #define USE_CRC_EMU
 
     #ifdef USE_CRC_EMU
 
@@ -248,7 +248,7 @@ void MY_FAST_CALL CrcGenerateTable()
     g_CrcUpdate = CrcUpdateT1;
   
   #else
- 
+  
     #ifdef MY_CPU_LE
 
       g_CrcUpdateT4 = CrcUpdateT4;

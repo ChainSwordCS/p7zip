@@ -281,42 +281,49 @@ void MY_FAST_CALL CrcGenerateTable()
             g_CrcUpdate = CrcUpdateT1;
           else
         #endif
-        {
-          for (i = 256 * CRC_NUM_TABLES - 1; i >= 256; i--)
           {
-            UInt32 x = g_CrcTable[(size_t)i - 256];
-            g_CrcTable[i] = CRC_UINT32_SWAP(x);
+            for (i = 256 * CRC_NUM_TABLES - 1; i >= 256; i--)
+            {
+              UInt32 x = g_CrcTable[(size_t)i - 256];
+              g_CrcTable[i] = CRC_UINT32_SWAP(x);
+            }
+            g_CrcUpdateT4 = CrcUpdateT1_BeT4;
+            g_CrcUpdate = CrcUpdateT1_BeT4;
+            #if CRC_NUM_TABLES >= 8
+              g_CrcUpdateT8 = CrcUpdateT1_BeT8;
+              g_CrcUpdate = CrcUpdateT1_BeT8;
+            #endif
           }
-          g_CrcUpdateT4 = CrcUpdateT1_BeT4;
-          g_CrcUpdate = CrcUpdateT1_BeT4;
-          #if CRC_NUM_TABLES >= 8
-            g_CrcUpdateT8 = CrcUpdateT1_BeT8;
-            g_CrcUpdate = CrcUpdateT1_BeT8;
-          #endif
-        }
       }
     #endif
   #endif
 
-#ifdef MY_CPU_LE
-  #ifdef USE_ARM64_CRC
-    if (CPU_IsSupported_CRC32())
-    {
+  #ifdef MY_CPU_LE
+    #ifdef USE_ARM64_CRC
+      if (CPU_IsSupported_CRC32())
+      {
+        g_CrcUpdateT0_32 = CrcUpdateT0_32;
+        g_CrcUpdateT0_64 = CrcUpdateT0_64;
+        g_CrcUpdate =
+          #if defined(MY_CPU_ARM)
+            // ARM AArch32 with CRC32 extension
+            CrcUpdateT0_32;
+          #else
+            CrcUpdateT0_64;
+          #endif
+      }
+    #endif
+    
+    #ifdef USE_CRC_EMU
       g_CrcUpdateT0_32 = CrcUpdateT0_32;
       g_CrcUpdateT0_64 = CrcUpdateT0_64;
       g_CrcUpdate =
         #if defined(MY_CPU_ARM)
+          // ARM 32-bit or ARM AArch32 without CRC32 extension
           CrcUpdateT0_32;
         #else
           CrcUpdateT0_64;
         #endif
-    }
+    #endif
   #endif
-  
-  #ifdef USE_CRC_EMU
-    g_CrcUpdateT0_32 = CrcUpdateT0_32;
-    g_CrcUpdateT0_64 = CrcUpdateT0_64;
-    g_CrcUpdate = CrcUpdateT0_64;
-  #endif
-#endif
 }
